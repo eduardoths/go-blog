@@ -65,39 +65,50 @@ func (ah AuthorHandler) get(ctx *fiber.Ctx) error {
 	if err != nil || authorId == "" {
 		status = http.StatusBadRequest
 		response.Errors =[]interface{}{"Bad query params"}
+		return ctx.Status(status).JSON(response)
 
-	} else if data, err := ah.serv.Get(id); err != nil {
-		if err.Error()[:3] == "pq:" {  // Errors coming from postgres
-			status = http.StatusNotFound
-			response.Errors = []interface{}{"Author not found"}
-		} else {
-			status = http.StatusInternalServerError
-			response.Errors = []interface{}{"INTERNAL SERVER ERROR"}
-		}
-	} else {
-		status = http.StatusOK
-		response.Data = data
+	} 
+	data, err := ah.serv.Get(id)
+	if err != nil {
+		status = http.StatusNotFound
+		response.Errors = []interface{}{err.Error()}
+		return ctx.Status(status).JSON(response)
 	}
+
+	status = http.StatusOK
+	response.Data = data
 	return ctx.Status(status).JSON(response)
 }
 
 func (ah AuthorHandler) update(ctx *fiber.Ctx) error {
 	var authorUpdate structs.Author
+	var body map[string]interface{} 
 	response := myhttp.New()
-	status := http.StatusOK
+	status := 0
+
 	authorId := ctx.Params("id")
+
 	id, err := strconv.Atoi(authorId)
 	if err != nil {
 		status = http.StatusBadRequest
 		response.Errors = []interface{}{"Bad Request"}
-	} else if err := ctx.BodyParser(&authorUpdate); err != nil {
-		response.Errors = []interface{}{"Invalid request"}
-		status = http.StatusBadRequest
+		return ctx.Status(status).JSON(response)
+	} 
+	
+	if err := ctx.BodyParser(&body); err != nil {
+		response.Errors = []interface{}{"Invalid request", err.Error()}
+		return ctx.Status(http.StatusBadRequest).JSON(response)
+	}
 
-	} else if err := ah.serv.Update(id, authorUpdate); err != nil {
-		if err.Error()[:3] == "pq:" {  // Errors coming from postgres
-			status = http.StatusInternalServerError
-			response.Errors = []interface{}{"Internal server error"}
+	authorUpdate = structs.Author{
+		Name: body["name"].(string),
+		Email: body["email"].(string),
+	}
+
+	if err := ah.serv.Update(id, authorUpdate); err != nil {
+		if err.Error() == "record not found" {
+			status = http.StatusNotFound
+			response.Errors = []interface{}{err.Error()}
 		} else {
 			status = http.StatusBadRequest
 			response.Errors = []interface{}{
@@ -105,11 +116,11 @@ func (ah AuthorHandler) update(ctx *fiber.Ctx) error {
 				err.Error(),
 			}
 		}
-
-	} else {
-		response.Data = "Author changed!"
-		status = http.StatusOK
+		return ctx.Status(status).JSON(response)
 	}
+
+	response.Data = "Author changed!"
+	status = http.StatusOK
 	return ctx.Status(status).JSON(response)
 }
 
@@ -121,17 +132,19 @@ func (ah AuthorHandler) delete(ctx *fiber.Ctx) error {
 	if err != nil {
 		status = http.StatusBadRequest
 		response.Errors = []interface{}{"Bad Request"}
-	} else if err = ah.serv.Delete(id); err != nil {
-		if err.Error()[:3] == "pq:" {
-			status = http.StatusInternalServerError
-			response.Errors = []interface{}{"User not found"}
+		return ctx.Status(status).JSON(response)
+	} 
+	if err = ah.serv.Delete(id); err != nil {
+		if err.Error() == "record not found" {
+			status = http.StatusNotFound
 		} else {
 			status = http.StatusInternalServerError
-			response.Errors = []interface{}{err.Error()}
 		}
-	} else {
-		status = http.StatusOK
-		response.Data = "User deleted"
+		response.Errors = []interface{}{err.Error()}
+		return ctx.Status(status).JSON(response)
 	}
+
+	status = http.StatusOK
+	response.Data = "User deleted"
 	return ctx.Status(status).JSON(response)
 }
