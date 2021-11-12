@@ -10,10 +10,12 @@ go build cmd/api/main.go
 
 # Como executar
 
-```
+```bash
 ./main
 ```
 
 # Como testar
 
-TODO
+```bash
+go test ./src/...
+```
