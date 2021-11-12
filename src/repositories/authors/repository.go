@@ -1,6 +1,8 @@
 package authors
 
 import (
+	"errors"
+
 	"github.com/eduardothsantos/go-blog/src/structs"
 	"gorm.io/gorm"
 )
@@ -36,11 +38,17 @@ func (ar AuthorRepository) Update(id int, author structs.Author) error {
 		Name: author.Name,
 		Email: author.Email,
 	}
-	tx := ar.db.Model(structs.Author{}).Where("id = ?", id).Updates(authorToUpdate)
+	tx := ar.db.Model(structs.Author{}).Where("id = ?", id).Updates(&authorToUpdate)
+	if tx.RowsAffected == 0 {
+		return errors.New("record not found")
+	}
 	return tx.Error
 }
 
 func (ar AuthorRepository) Delete(id int) error {
 	tx := ar.db.Where("id = ?", id).Delete(&structs.Author{})
+	if tx.RowsAffected == 0 {
+		return errors.New("record not found")
+	}
 	return tx.Error
 }
