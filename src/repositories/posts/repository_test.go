@@ -11,18 +11,18 @@ import (
 )
 
 var db *gorm.DB = databases.TestConfig()
-var author structs.Author = structs.Author {
-	Name: "Test author",
+var author structs.Author = structs.Author{
+	Name:  "Test author",
 	Email: "test@author.com",
 }
 var authorId int = 5
-var post structs.Post = structs.Post {
+var post structs.Post = structs.Post{
 	Title: "Test post",
-	Text: "Test text",
+	Text:  "Test text",
 }
 var postRepo PostRepository = NewPostRepository(db)
 
-func queryPost(postId int) (structs.Post) {
+func queryPost(postId int) structs.Post {
 	var actualPost structs.Post
 	db.Where("id = ?", postId).Take(&actualPost)
 	return actualPost
@@ -35,9 +35,9 @@ func insertAuthor() int {
 }
 
 func insertPost(authorId int) int {
-	newPost := structs.Post {
-		Title: "Test post",
-		Text: "Test text",
+	newPost := structs.Post{
+		Title:    "Test post",
+		Text:     "Test text",
 		AuthorId: authorId,
 	}
 	db.Save(&newPost)
@@ -61,35 +61,34 @@ func TestNewPostRepository(t *testing.T) {
 	})
 }
 
-
 func TestCreate(t *testing.T) {
 	authorId := insertAuthor()
 
 	t.Run("Create post on database", func(t *testing.T) {
-		expectedValue := structs.Post {
-			Title: "Test post",
-			Text: "This is a test post",
+		expectedValue := structs.Post{
+			Title:    "Test post",
+			Text:     "This is a test post",
 			AuthorId: authorId,
 		}
 		id, err := postRepo.Create(expectedValue)
 		expectedValue.ID = id
 		actualPost := queryPost(id)
 		cleanTimestamp(&actualPost)
-		
+
 		tests.AssertEquals(t, nil, err)
 		tests.AssertEquals(t, expectedValue, actualPost)
 	})
 	t.Run("Create post - SQL Injection", func(t *testing.T) {
-		expectedValue := structs.Post {
-			Title: "Test post",
-			Text: "This is a test post;DELETE FROM posts; DELETE FROM authors;",
+		expectedValue := structs.Post{
+			Title:    "Test post",
+			Text:     "This is a test post;DELETE FROM posts; DELETE FROM authors;",
 			AuthorId: authorId,
 		}
 		id, err := postRepo.Create(expectedValue)
 		expectedValue.ID = id
 		actualPost := queryPost(id)
 		cleanTimestamp(&actualPost)
-		
+
 		tests.AssertEquals(t, nil, err)
 		tests.AssertEquals(t, expectedValue, actualPost)
 	})
@@ -101,9 +100,9 @@ func TestGet(t *testing.T) {
 		authorId = insertAuthor()
 		postId := insertPost(authorId)
 		expectedPost := structs.Post{
-			ID: postId,
-			Text: post.Text,
-			Title: post.Title,
+			ID:       postId,
+			Text:     post.Text,
+			Title:    post.Title,
 			AuthorId: authorId,
 		}
 		aPost, err := postRepo.Get(postId)
@@ -119,12 +118,12 @@ func TestUpdate(t *testing.T) {
 		authorId := insertAuthor()
 		postId := insertPost(authorId)
 		expectedPost := structs.Post{
-			ID: postId,
-			Text: "Test post 2",
-			Title: "Updated post",
+			ID:       postId,
+			Text:     "Test post 2",
+			Title:    "Updated post",
 			AuthorId: authorId,
 		}
-		var expectedErr error = nil 
+		var expectedErr error = nil
 		actualErr := postRepo.Update(postId, expectedPost)
 		actualPost := queryPost(postId)
 		cleanTimestamp(&actualPost)
@@ -137,12 +136,12 @@ func TestUpdate(t *testing.T) {
 		authorId := insertAuthor()
 		postId := insertPost(authorId)
 		expectedPost := structs.Post{
-			ID: postId,
-			Text: "Test post 2",
-			Title: "Updated post;DELETE FROM posts; DELETE FROM authors;",
+			ID:       postId,
+			Text:     "Test post 2",
+			Title:    "Updated post;DELETE FROM posts; DELETE FROM authors;",
 			AuthorId: authorId,
 		}
-		var expectedErr error = nil 
+		var expectedErr error = nil
 		actualErr := postRepo.Update(postId, expectedPost)
 		actualPost := queryPost(postId)
 		cleanTimestamp(&actualPost)

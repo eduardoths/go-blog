@@ -6,17 +6,17 @@ import (
 )
 
 type PostRepository struct {
-	db *gorm.DB 
+	db *gorm.DB
 }
 
 type postUpdate struct {
 	Title string
-	Text string
+	Text  string
 }
 
-func NewPostRepository(db *gorm.DB) (PostRepository) {
+func NewPostRepository(db *gorm.DB) PostRepository {
 	return PostRepository{
-		db:  db,
+		db: db,
 	}
 }
 
@@ -33,7 +33,7 @@ func (pr PostRepository) Get(id int) (structs.Post, error) {
 func (pr PostRepository) Update(id int, post structs.Post) error {
 	postToUpdate := postUpdate{
 		Title: post.Title,
-		Text: post.Text,
+		Text:  post.Text,
 	}
 	tx := pr.db.Model(structs.Post{}).Where("id = ?", id).Updates(postToUpdate)
 	return tx.Error

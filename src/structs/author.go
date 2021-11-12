@@ -7,9 +7,9 @@ import (
 )
 
 type Author struct {
-	ID int
-	Name string
-	Email string
+	ID        int
+	Name      string
+	Email     string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt

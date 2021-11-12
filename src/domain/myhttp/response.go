@@ -1,6 +1,6 @@
 package myhttp
 
-type response struct{
+type response struct {
 	Data   interface{}   `json:"data"`
 	Errors []interface{} `json:"errors"`
 }

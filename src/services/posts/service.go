@@ -30,7 +30,7 @@ func (ps PostService) Create(post structs.Post) (int, error) {
 func (ps PostService) Get(id int) (structs.Post, error) {
 	var errorToReturn error
 	post, err := ps.Repo.Get(id)
-	
+
 	if err != nil {
 		errorToReturn = errors.New("INTERNAL SERVER ERROR")
 	} else {

@@ -10,7 +10,7 @@ import (
 )
 
 var fakeAuthor structs.Author = structs.Author{
-	Name: "Test author",
+	Name:  "Test author",
 	Email: "test@author.com",
 }
 var repo interfaces.AuthorRepository = authors.MockAuthorRepository{
@@ -31,13 +31,13 @@ func TestCreate(t *testing.T) {
 	t.Run("Test author creation service", func(t *testing.T) {
 		var expectedErr error = nil
 		_, actualErr := authorService.Create(fakeAuthor)
-		tests.AssertEquals(t, expectedErr, actualErr)  
+		tests.AssertEquals(t, expectedErr, actualErr)
 	})
 
 	t.Run("Test author creation with invalid name", func(t *testing.T) {
 		var expectedErr string = "name.invalid"
 		expectedAuthor := structs.Author{
-			Name: "  ",
+			Name:  "  ",
 			Email: "test@author.com",
 		}
 		_, actualErr := authorService.Create(expectedAuthor)
@@ -65,7 +65,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("Test author update with invalid name", func(t *testing.T) {
 		expectedErr := "name.invalid"
 		expectedAuthor := structs.Author{
-			Name: "     3ed",
+			Name:  "     3ed",
 			Email: "test@author.com",
 		}
 		actualErr := authorService.Update(0, expectedAuthor)

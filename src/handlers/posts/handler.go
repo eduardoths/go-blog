@@ -9,13 +9,13 @@ import (
 )
 
 type PostHandler struct {
-	serv interfaces.PostService
+	serv  interfaces.PostService
 	route fiber.Router
 }
 
-func NewPostHandler(route fiber.Router, serv interfaces.PostService) PostHandler{
+func NewPostHandler(route fiber.Router, serv interfaces.PostService) PostHandler {
 	return PostHandler{
-		serv: serv,
+		serv:  serv,
 		route: route,
 	}
 }

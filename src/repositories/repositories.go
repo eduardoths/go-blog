@@ -8,13 +8,13 @@ import (
 )
 
 type RepositoryContainer struct {
-	PostRepository interfaces.PostRepository
+	PostRepository   interfaces.PostRepository
 	AuthorRepository interfaces.AuthorRepository
 }
 
 func NewRepositoryContainer(db *gorm.DB) RepositoryContainer {
 	return RepositoryContainer{
-		PostRepository: posts.NewPostRepository(db),
+		PostRepository:   posts.NewPostRepository(db),
 		AuthorRepository: authors.NewAuthorRepository(db),
 	}
 }

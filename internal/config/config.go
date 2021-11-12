@@ -13,7 +13,6 @@ type Config struct {
 	User     string
 	Password string
 	Database string
-
 }
 
 var config Config
@@ -27,10 +26,10 @@ func init() {
 
 func GetConfig() Config {
 	if config == (Config{}) {
-		config = Config {
-			Host: os.Getenv("DB_HOST"),
-			Port: os.Getenv("DB_PORT"),
-			User: os.Getenv("DB_USER"),
+		config = Config{
+			Host:     os.Getenv("DB_HOST"),
+			Port:     os.Getenv("DB_PORT"),
+			User:     os.Getenv("DB_USER"),
 			Password: os.Getenv("DB_PASSWORD"),
 			Database: os.Getenv("DB_DATABASE"),
 		}

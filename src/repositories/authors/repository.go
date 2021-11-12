@@ -13,8 +13,8 @@ type AuthorRepository struct {
 }
 
 type authorUpdate struct {
-	Name string
-	Email string
+	Name      string
+	Email     string
 	UpdatedAt time.Time
 }
 
@@ -37,7 +37,7 @@ func (ar AuthorRepository) Get(id int) (structs.Author, error) {
 
 func (ar AuthorRepository) Update(id int, author structs.Author) error {
 	authorToUpdate := authorUpdate{
-		Name: author.Name,
+		Name:  author.Name,
 		Email: author.Email,
 	}
 	tx := ar.db.Model(structs.Author{}).Where("id = ?", id).Updates(&authorToUpdate)

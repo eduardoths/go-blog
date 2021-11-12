@@ -20,7 +20,6 @@ func AuthorValidation(author *structs.Author) error {
 	return nil
 }
 
-
 type AuthorService struct {
 	Repo interfaces.AuthorRepository
 }

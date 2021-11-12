@@ -26,7 +26,7 @@ func main() {
 	handlersContainer := handlers.NewHandlerContainer(server, servicesContainer)
 	handlersContainer.AuthorHandler.Route()
 	handlersContainer.PostHandler.Route()
-	
+
 	server.Get("/health", health)
 
 	if err := server.Listen(":3000"); err != nil {

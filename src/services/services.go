@@ -8,13 +8,13 @@ import (
 )
 
 type ServiceContainer struct {
-	PostService interfaces.PostService
+	PostService   interfaces.PostService
 	AuthorService interfaces.AuthorService
 }
 
 func GetServices(repos repositories.RepositoryContainer) ServiceContainer {
 	return ServiceContainer{
-		PostService: posts.NewPostService(repos.PostRepository),
+		PostService:   posts.NewPostService(repos.PostRepository),
 		AuthorService: authors.NewAuthorService(repos.AuthorRepository),
 	}
 }

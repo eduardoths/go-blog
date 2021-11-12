@@ -5,7 +5,6 @@ import (
 	"github.com/eduardothsantos/go-blog/src/structs"
 )
 
-
 type MockAuthorRepository struct {
 	interfaces.PostRepository
 	FakeAuthor structs.Author
@@ -13,7 +12,7 @@ type MockAuthorRepository struct {
 
 func (mar MockAuthorRepository) Create(author structs.Author) (int, error) {
 	return 0, nil
-} 
+}
 
 func (mar MockAuthorRepository) Get(id int) (structs.Author, error) {
 	return mar.FakeAuthor, nil

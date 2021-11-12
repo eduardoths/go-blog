@@ -11,13 +11,13 @@ import (
 )
 
 type AuthorHandler struct {
-	serv interfaces.AuthorService
+	serv  interfaces.AuthorService
 	route fiber.Router
 }
 
-func NewAuthorHandler(route fiber.Router, serv interfaces.AuthorService) AuthorHandler{
+func NewAuthorHandler(route fiber.Router, serv interfaces.AuthorService) AuthorHandler {
 	return AuthorHandler{
-		serv: serv,
+		serv:  serv,
 		route: route,
 	}
 }
@@ -32,16 +32,16 @@ func (ah AuthorHandler) Route() {
 
 func (ah AuthorHandler) create(ctx *fiber.Ctx) error {
 	var authorCreate structs.Author
-	var body map[string]interface{} 
+	var body map[string]interface{}
 	response := myhttp.New()
 	status := 0
-	
+
 	if err := ctx.BodyParser(&body); err != nil {
 		response.Errors = []interface{}{"Invalid request", err.Error()}
 		return ctx.Status(http.StatusBadRequest).JSON(response)
 	}
 	authorCreate = structs.Author{
-		Name: body["name"].(string),
+		Name:  body["name"].(string),
 		Email: body["email"].(string),
 	}
 	id, err := ah.serv.Create(authorCreate)
@@ -64,10 +64,10 @@ func (ah AuthorHandler) get(ctx *fiber.Ctx) error {
 	id, err := strconv.Atoi(authorId)
 	if err != nil || authorId == "" {
 		status = http.StatusBadRequest
-		response.Errors =[]interface{}{"Bad query params"}
+		response.Errors = []interface{}{"Bad query params"}
 		return ctx.Status(status).JSON(response)
 
-	} 
+	}
 	data, err := ah.serv.Get(id)
 	if err != nil {
 		status = http.StatusNotFound
@@ -82,7 +82,7 @@ func (ah AuthorHandler) get(ctx *fiber.Ctx) error {
 
 func (ah AuthorHandler) update(ctx *fiber.Ctx) error {
 	var authorUpdate structs.Author
-	var body map[string]interface{} 
+	var body map[string]interface{}
 	response := myhttp.New()
 	status := 0
 
@@ -93,15 +93,15 @@ func (ah AuthorHandler) update(ctx *fiber.Ctx) error {
 		status = http.StatusBadRequest
 		response.Errors = []interface{}{"Bad Request"}
 		return ctx.Status(status).JSON(response)
-	} 
-	
+	}
+
 	if err := ctx.BodyParser(&body); err != nil {
 		response.Errors = []interface{}{"Invalid request", err.Error()}
 		return ctx.Status(http.StatusBadRequest).JSON(response)
 	}
 
 	authorUpdate = structs.Author{
-		Name: body["name"].(string),
+		Name:  body["name"].(string),
 		Email: body["email"].(string),
 	}
 
@@ -133,7 +133,7 @@ func (ah AuthorHandler) delete(ctx *fiber.Ctx) error {
 		status = http.StatusBadRequest
 		response.Errors = []interface{}{"Bad Request"}
 		return ctx.Status(status).JSON(response)
-	} 
+	}
 	if err = ah.serv.Delete(id); err != nil {
 		if err.Error() == "record not found" {
 			status = http.StatusNotFound

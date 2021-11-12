@@ -12,8 +12,8 @@ import (
 
 var db *gorm.DB = databases.TestConfig()
 var authorRepo AuthorRepository = AuthorRepository{db: db}
-var author structs.Author = structs.Author {
-	Name: "Test author",
+var author structs.Author = structs.Author{
+	Name:  "Test author",
 	Email: "test@author.com",
 }
 
@@ -25,7 +25,7 @@ func queryAuthor(authorId int) structs.Author {
 
 func insertAuthor() (int, structs.Author) {
 	newAuthor := structs.Author{
-		Name: "Test author",
+		Name:  "Test author",
 		Email: "test@author.com",
 	}
 	db.Table("authors").Save(&newAuthor)
@@ -39,7 +39,7 @@ func cleanTimestamp(author *structs.Author) {
 }
 
 func TestNewAuthorRepository(t *testing.T) {
-	t.Run("Create author repository container", func (t *testing.T) {
+	t.Run("Create author repository container", func(t *testing.T) {
 		expected := AuthorRepository{db: db}
 		actual := NewAuthorRepository(db)
 
@@ -48,8 +48,8 @@ func TestNewAuthorRepository(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
-	t.Run("Create author function", func (t *testing.T) {
-		var expectedReturn error = nil 
+	t.Run("Create author function", func(t *testing.T) {
+		var expectedReturn error = nil
 		expectedAuthor := author
 		id, actualReturn := authorRepo.Create(expectedAuthor)
 		expectedAuthor.ID = id
@@ -58,10 +58,10 @@ func TestCreate(t *testing.T) {
 		tests.AssertEquals(t, expectedReturn, actualReturn)
 		tests.AssertEquals(t, expectedAuthor, actualAuthor)
 	})
-	t.Run("Create author - sql injection", func (t *testing.T) {
+	t.Run("Create author - sql injection", func(t *testing.T) {
 		var expectedErr error = nil
-		expectedAuthor := structs.Author {
-			Name: "author",
+		expectedAuthor := structs.Author{
+			Name:  "author",
 			Email: "author@email.com;DELETE FROM authors;",
 		}
 		id, actualErr := authorRepo.Create(expectedAuthor)
@@ -89,13 +89,12 @@ func TestUpdate(t *testing.T) {
 		id, _ := insertAuthor()
 		var expectedErr error = nil
 		expectedAuthor := structs.Author{
-			Name: "Test Author Two",
+			Name:  "Test Author Two",
 			Email: "test2@author.com",
-
 		}
-		actualErr := authorRepo.Update(id, expectedAuthor) 
+		actualErr := authorRepo.Update(id, expectedAuthor)
 		actualAuthor := queryAuthor(id)
-		actualAuthor.ID = 0  // Don't care
+		actualAuthor.ID = 0 // Don't care
 		createdAt := actualAuthor.CreatedAt
 		updatedAt := actualAuthor.UpdatedAt
 		cleanTimestamp(&actualAuthor)
@@ -109,8 +108,8 @@ func TestUpdate(t *testing.T) {
 	t.Run("Update author - SQL Injection", func(t *testing.T) {
 		id, _ := insertAuthor()
 		var expectedErr error = nil
-		expectedAuthor := structs.Author {
-			Name: "Test author three",
+		expectedAuthor := structs.Author{
+			Name:  "Test author three",
 			Email: "test@author.com;DELETE FROM posts; DELETE FROM authors;",
 		}
 		actualErr := authorRepo.Update(id, expectedAuthor)
@@ -124,9 +123,9 @@ func TestUpdate(t *testing.T) {
 		var expectedErr string = "record not found"
 		id, _ := insertAuthor()
 		db.Where("id = ?", id).Delete(&structs.Author{})
-		expectedAuthor := structs.Author {
-			ID: id,
-			Name: "Deleted user",
+		expectedAuthor := structs.Author{
+			ID:    id,
+			Name:  "Deleted user",
 			Email: "test@author.com",
 		}
 		actualErr := authorRepo.Update(id, expectedAuthor)
@@ -138,10 +137,10 @@ func TestUpdate(t *testing.T) {
 		fakeId := 4812
 		fakeCreatedAt := time.Date(2001, 12, 31, 23, 58, 58, 2, time.UTC)
 		var expectedErr error = nil
-		updatedAuthor := structs.Author {
-			ID: fakeId,
-			Name: "author",
-			Email: "author@author.com",
+		updatedAuthor := structs.Author{
+			ID:        fakeId,
+			Name:      "author",
+			Email:     "author@author.com",
 			CreatedAt: fakeCreatedAt,
 		}
 		actualErr := authorRepo.Update(id, updatedAuthor)
@@ -170,7 +169,7 @@ func TestDelete(t *testing.T) {
 		actualAuthor := queryAuthor(id)
 		cleanTimestamp(&actualAuthor)
 		tests.AssertEquals(t, expectedErr, actualErr)
-		tests.AssertEquals(t, structs.Author{}, actualAuthor)  // Should still exist as we're using soft deletes
+		tests.AssertEquals(t, structs.Author{}, actualAuthor) // Should still exist as we're using soft deletes
 	})
 	t.Run("Delete already deleted author", func(t *testing.T) {
 		id, _ := insertAuthor()

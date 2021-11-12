@@ -10,4 +10,4 @@ func TransformSingleLine(text string) string {
 	space := regexp.MustCompile(`\s+`)
 	text = space.ReplaceAllString(text, " ")
 	return text
-} 
+}
