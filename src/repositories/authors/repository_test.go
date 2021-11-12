@@ -96,9 +96,14 @@ func TestUpdate(t *testing.T) {
 		actualErr := authorRepo.Update(id, expectedAuthor) 
 		actualAuthor := queryAuthor(id)
 		actualAuthor.ID = 0  // Don't care
+		createdAt := actualAuthor.CreatedAt
+		updatedAt := actualAuthor.UpdatedAt
 		cleanTimestamp(&actualAuthor)
 		tests.AssertEquals(t, expectedErr, actualErr)
 		tests.AssertEquals(t, expectedAuthor, actualAuthor)
+		if !updatedAt.After(createdAt) {
+			t.Errorf("Updated at wasn't changed")
+		}
 	})
 
 	t.Run("Update author - SQL Injection", func(t *testing.T) {
