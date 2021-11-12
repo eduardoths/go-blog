@@ -79,6 +79,20 @@ func TestCreate(t *testing.T) {
 		tests.AssertEquals(t, nil, err)
 		tests.AssertEquals(t, expectedValue, actualPost)
 	})
+	t.Run("Create post - SQL Injection", func(t *testing.T) {
+		expectedValue := structs.Post {
+			Title: "Test post",
+			Text: "This is a test post;DELETE FROM posts; DELETE FROM authors;",
+			AuthorId: authorId,
+		}
+		id, err := postRepo.Create(expectedValue)
+		expectedValue.ID = id
+		actualPost := queryPost(id)
+		cleanTimestamp(&actualPost)
+		
+		tests.AssertEquals(t, nil, err)
+		tests.AssertEquals(t, expectedValue, actualPost)
+	})
 }
 
 func TestGet(t *testing.T) {
@@ -108,6 +122,24 @@ func TestUpdate(t *testing.T) {
 			ID: postId,
 			Text: "Test post 2",
 			Title: "Updated post",
+			AuthorId: authorId,
+		}
+		var expectedErr error = nil 
+		actualErr := postRepo.Update(postId, expectedPost)
+		actualPost := queryPost(postId)
+		cleanTimestamp(&actualPost)
+
+		tests.AssertEquals(t, expectedErr, actualErr)
+		tests.AssertEquals(t, expectedPost, actualPost)
+	})
+
+	t.Run("Update post - SQL Injection", func(t *testing.T) {
+		authorId := insertAuthor()
+		postId := insertPost(authorId)
+		expectedPost := structs.Post{
+			ID: postId,
+			Text: "Test post 2",
+			Title: "Updated post;DELETE FROM posts; DELETE FROM authors;",
 			AuthorId: authorId,
 		}
 		var expectedErr error = nil 

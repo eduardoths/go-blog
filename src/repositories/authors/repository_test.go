@@ -58,6 +58,19 @@ func TestCreate(t *testing.T) {
 		tests.AssertEquals(t, expectedReturn, actualReturn)
 		tests.AssertEquals(t, expectedAuthor, actualAuthor)
 	})
+	t.Run("Create author - sql injection", func (t *testing.T) {
+		var expectedErr error = nil
+		expectedAuthor := structs.Author {
+			Name: "author",
+			Email: "author@email.com;DELETE FROM authors;",
+		}
+		id, actualErr := authorRepo.Create(expectedAuthor)
+		expectedAuthor.ID = id
+		actualAuthor := queryAuthor(id)
+		cleanTimestamp(&actualAuthor)
+		tests.AssertEquals(t, expectedErr, actualErr)
+		tests.AssertEquals(t, expectedAuthor, actualAuthor)
+	})
 }
 
 func TestGet(t *testing.T) {
@@ -72,9 +85,9 @@ func TestGet(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	id, _ := insertAuthor()
-	var expectedErr error = nil
 	t.Run("Update author", func(t *testing.T) {
+		id, _ := insertAuthor()
+		var expectedErr error = nil
 		expectedAuthor := structs.Author{
 			Name: "Test Author Two",
 			Email: "test2@author.com",
@@ -85,6 +98,23 @@ func TestUpdate(t *testing.T) {
 		cleanTimestamp(&actualAuthor)
 		tests.AssertEquals(t, expectedErr, actualErr)
 		tests.AssertEquals(t, expectedAuthor, actualAuthor)
+	})
+
+	t.Run("Update author - SQL Injection", func(t *testing.T) {
+		id, _ := insertAuthor()
+		var expectedErr error = nil
+		expectedAuthor := structs.Author {
+			Name: "Test author three",
+			Email: "test@author.com;DELETE FROM posts; DELETE FROM authors;",
+		}
+		actualErr := authorRepo.Update(id, expectedAuthor)
+		actualAuthor := queryAuthor(id)
+		actualAuthor.ID = 0
+		cleanTimestamp(&actualAuthor)
+		tests.AssertEquals(t, expectedErr, actualErr)
+		tests.AssertEquals(t, expectedAuthor, actualAuthor)
+
+
 	})
 }
 
