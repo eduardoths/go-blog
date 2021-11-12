@@ -2,6 +2,7 @@ package authors
 
 import (
 	"errors"
+	"time"
 
 	"github.com/eduardothsantos/go-blog/src/structs"
 	"gorm.io/gorm"
@@ -14,6 +15,7 @@ type AuthorRepository struct {
 type authorUpdate struct {
 	Name string
 	Email string
+	UpdatedAt time.Time
 }
 
 func NewAuthorRepository(db *gorm.DB) AuthorRepository {
