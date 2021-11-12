@@ -11,8 +11,8 @@ type MockAuthorRepository struct {
 	FakeAuthor structs.Author
 }
 
-func (mar MockAuthorRepository) Create(author structs.Author) error {
-	return nil
+func (mar MockAuthorRepository) Create(author structs.Author) (int, error) {
+	return 0, nil
 } 
 
 func (mar MockAuthorRepository) Get(id int) (structs.Author, error) {

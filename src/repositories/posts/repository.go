@@ -1,50 +1,45 @@
 package posts
 
 import (
-	"database/sql"
-
 	"github.com/eduardothsantos/go-blog/src/structs"
+	"gorm.io/gorm"
 )
 
 type PostRepository struct {
-	db *sql.DB 
+	db *gorm.DB 
 }
 
-func NewPostRepository(db *sql.DB) (PostRepository) {
+type postUpdate struct {
+	Title string
+	Text string
+}
+
+func NewPostRepository(db *gorm.DB) (PostRepository) {
 	return PostRepository{
 		db:  db,
 	}
 }
 
-func (pr PostRepository) Create(post structs.Post, authorId int) error {
-	_, err := pr.db.Exec("INSERT INTO posts (title, text, author_id) VALUES ($1, $2, $3)",
-	                  post.Title, 
-					  post.Text, 
-					  authorId)
-	return err
+func (pr PostRepository) Create(post structs.Post) (int, error) {
+	tx := pr.db.Save(&post)
+	return post.ID, tx.Error
 }
 
 func (pr PostRepository) Get(id int) (structs.Post, error) {
-	query := `
-		SELECT 
-			title, 
-			text,
-			name, 
-			email 
-		FROM posts 
-		INNER JOIN authors 
-		ON posts.author_id = authors.id
-		WHERE posts.id = $1`
 	var post structs.Post
-	err := pr.db.QueryRow(query, id).Scan(&post.Title, &post.Text, &post.Author.Name, &post.Author.Email)
-	return post, err
+	tx := pr.db.Where("id = ?", id).Take(&post)
+	return post, tx.Error
 }
 func (pr PostRepository) Update(id int, post structs.Post) error {
-	_, err := pr.db.Exec("UPDATE posts SET title=$1, text=$2 WHERE id=$3", post.Title, post.Text, id)
-	return err
+	postToUpdate := postUpdate{
+		Title: post.Title,
+		Text: post.Text,
+	}
+	tx := pr.db.Model(structs.Post{}).Where("id = ?", id).Updates(postToUpdate)
+	return tx.Error
 }
 
 func (pr PostRepository) Delete(id int) error {
-	_, err := pr.db.Exec("DELETE FROM posts WHERE id=$1", id)
-	return err
+	tx := pr.db.Where("id = ?", id).Delete(&structs.Post{})
+	return tx.Error
 }

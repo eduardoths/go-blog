@@ -1,59 +1,54 @@
 package databases
 
 import (
-	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"log"
 
 	"github.com/eduardothsantos/go-blog/internal/config"
-	_ "github.com/lib/pq"
+	"github.com/eduardothsantos/go-blog/migrations"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-var db *sql.DB
+var db *gorm.DB
 
-func Config() (*sql.DB) {
+func Config() (*gorm.DB) {
 	if db != nil {
 		return db
 	}
 	dbConfig := config.GetConfig()
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	psqlInfo := postgres.Open(fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 							dbConfig.Host,
 							dbConfig.Port,
 							dbConfig.User,
 							dbConfig.Password,
-							dbConfig.Database)
+							dbConfig.Database))
 	var err error
-	db, err = sql.Open("postgres", psqlInfo)
+	db, err = gorm.Open(psqlInfo)
 	if err != nil {
 		log.Fatalf("Couldn't connect to database, error: %v", err.Error())
 	}	
 	return db
 }
 
-func TestConfig() (*sql.DB) {
+func TestConfig() (*gorm.DB) {
 	if db != nil {
 		return db
 	}
 	dbConfig := config.GetConfig()
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	psqlInfo := postgres.Open(fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 							dbConfig.Host,
 							dbConfig.Port,
 							dbConfig.User,
 							dbConfig.Password,
-							"test")
+							"test"))
 	var err error
-	db, err = sql.Open("postgres", psqlInfo)
+	db, err = gorm.Open(psqlInfo)
 	if err != nil {
 		log.Fatalf("Couldn't connect to database, error: %v", err.Error())
 	}	
-	query, err := ioutil.ReadFile("/Users/Isaac/codes/go-blog/migrations/migration.sql")
-	if err != nil {
-		log.Fatalf("Couldn't read file %v, error: %v", "migrations/migration.sql", err.Error())
-	}
-	_, err = db.Exec(string(query))
-	if err != nil {
-		log.Fatalf("Couldn't execute query, error: %v", err.Error())
-	}
+	db.Exec("DROP TABLE posts; DROP TABLE authors;")
+	db.AutoMigrate(&migrations.Author{})
+	db.AutoMigrate(&migrations.Post{})
 	return db
 }

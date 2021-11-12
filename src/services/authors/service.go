@@ -31,10 +31,10 @@ func NewAuthorService(repo interfaces.AuthorRepository) AuthorService {
 	}
 }
 
-func (as AuthorService) Create(author structs.Author) error {
+func (as AuthorService) Create(author structs.Author) (int, error) {
 	err := AuthorValidation(&author)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	return as.Repo.Create(author)
 }

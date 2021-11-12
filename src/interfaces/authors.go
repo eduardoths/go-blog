@@ -5,14 +5,14 @@ import (
 )
 
 type AuthorRepository interface {
-	Create(author structs.Author) error
+	Create(author structs.Author) (int, error)
 	Get(id int) (structs.Author, error)
 	Update(id int, author structs.Author) error
 	Delete(id int) error
 }
 
 type AuthorService interface {
-	Create(author structs.Author) error
+	Create(author structs.Author) (int, error)
 	Get(id int) (structs.Author, error)
 	Update(id int, author structs.Author) error
 	Delete(id int) error
