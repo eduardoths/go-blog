@@ -1,39 +1,46 @@
 package authors
 
 import (
-	"database/sql"
-
 	"github.com/eduardothsantos/go-blog/src/structs"
+	"gorm.io/gorm"
 )
 
 type AuthorRepository struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
-func NewAuthorRepository(db *sql.DB) AuthorRepository {
+type authorUpdate struct {
+	Name string
+	Email string
+}
+
+func NewAuthorRepository(db *gorm.DB) AuthorRepository {
 	return AuthorRepository{
 		db: db,
 	}
 }
 
-func (ar AuthorRepository) Create(author structs.Author) error {
-	_, err := ar.db.Exec("INSERT INTO authors (name, email) VALUES ($1, $2);", author.Name, author.Email)
-	return err
+func (ar AuthorRepository) Create(author structs.Author) (int, error) {
+	tx := ar.db.Save(&author)
+	return author.ID, tx.Error
 }
 
 func (ar AuthorRepository) Get(id int) (structs.Author, error) {
 	var author structs.Author
-	err := ar.db.QueryRow("SELECT name, email FROM authors WHERE id = $1;", id).Scan(&author.Name, &author.Email)
-	return author, err
+	tx := ar.db.Where("id = ?", id).Take(&author)
+	return author, tx.Error
 }
 
 func (ar AuthorRepository) Update(id int, author structs.Author) error {
-	_, err := ar.db.Exec("UPDATE authors SET name=$1, email=$2 WHERE id = $3;", 
-	                     author.Name, author.Email, id)
-	return err
+	authorToUpdate := authorUpdate{
+		Name: author.Name,
+		Email: author.Email,
+	}
+	tx := ar.db.Model(structs.Author{}).Where("id = ?", id).Updates(authorToUpdate)
+	return tx.Error
 }
 
 func (ar AuthorRepository) Delete(id int) error {
-	_, err := ar.db.Exec("DELETE FROM authors WHERE id = $1;", id)
-	return err
+	tx := ar.db.Where("id = ?", id).Delete(&structs.Author{})
+	return tx.Error
 }

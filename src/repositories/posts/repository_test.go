@@ -1,15 +1,16 @@
 package posts
 
 import (
-	"database/sql"
 	"testing"
+	"time"
 
 	"github.com/eduardothsantos/go-blog/pkg/databases"
 	"github.com/eduardothsantos/go-blog/src/domain/tests"
 	"github.com/eduardothsantos/go-blog/src/structs"
+	"gorm.io/gorm"
 )
 
-var db *sql.DB = databases.TestConfig()
+var db *gorm.DB = databases.TestConfig()
 var author structs.Author = structs.Author {
 	Name: "Test author",
 	Email: "test@author.com",
@@ -21,44 +22,32 @@ var post structs.Post = structs.Post {
 }
 var postRepo PostRepository = NewPostRepository(db)
 
-func queryPost(t testing.TB, postId int) (structs.Post, int, error) {
-	t.Helper()
+func queryPost(postId int) (structs.Post) {
 	var actualPost structs.Post
-	var actualAuthorId int
-	query := `
-		SELECT 
-			title, 
-			text, 
-			authors.id 
-		FROM posts 
-		INNER JOIN authors ON authors.id = posts.author_id
-		WHERE posts.id = $1;`
-	err := db.QueryRow(query, postId).Scan(
-			&actualPost.Title, 
-			&actualPost.Text, 
-			&actualAuthorId) 
-	return actualPost, actualAuthorId, err
+	db.Where("id = ?", postId).Take(&actualPost)
+	return actualPost
 }
 
-func insertAuthor(t testing.TB) int {
-	t.Helper()
-	var authorId int
-	err := db.QueryRow("INSERT INTO authors (name, email) VALUES ($1, $2) RETURNING id;", author.Name, author.Email).Scan(&authorId)
-	if err != nil {
-		t.Errorf("Test failed to setup database, error %v", err.Error())
-	}
-	return authorId
+func insertAuthor() int {
+	db.Save(&author)
+	return author.ID
 
 }
 
-func insertPost(t testing.TB, authorId int) int {
-	t.Helper()
-	var postId int
-	err := db.QueryRow("INSERT INTO posts (title, text, author_id) VALUES ($1, $2, $3) RETURNING id;", post.Title, post.Text, authorId).Scan(&postId)
-	if err != nil {
-		t.Errorf("Test failed to setup database %v", err.Error())
+func insertPost(authorId int) int {
+	newPost := structs.Post {
+		Title: "Test post",
+		Text: "Test text",
+		AuthorId: authorId,
 	}
-	return postId
+	db.Save(&newPost)
+	return newPost.ID
+}
+
+func cleanTimestamp(post *structs.Post) {
+	post.DeletedAt = gorm.DeletedAt{}
+	post.CreatedAt = time.Time{}
+	post.UpdatedAt = time.Time{}
 }
 
 func TestNewPostRepository(t *testing.T) {
@@ -74,67 +63,73 @@ func TestNewPostRepository(t *testing.T) {
 
 
 func TestCreate(t *testing.T) {
-	defer db.Exec("DELETE FROM posts; DELETE FROM authors;")
-	authorId := insertAuthor(t)
+	authorId := insertAuthor()
 
 	t.Run("Create post on database", func(t *testing.T) {
-		err := postRepo.Create(post, authorId)
-		tests.AssertEquals(t, nil, err)
-		actualPost, actualAuthorId, err := queryPost(t, 1)
-		if err != nil {
-			t.Errorf("Failed to retrieve data from database, err %v", err)
+		expectedValue := structs.Post {
+			Title: "Test post",
+			Text: "This is a test post",
+			AuthorId: authorId,
 		}
-		tests.AssertEquals(t, post, actualPost)
-		tests.AssertEquals(t, authorId, actualAuthorId)
+		id, err := postRepo.Create(expectedValue)
+		expectedValue.ID = id
+		actualPost := queryPost(id)
+		cleanTimestamp(&actualPost)
+		
+		tests.AssertEquals(t, nil, err)
+		tests.AssertEquals(t, expectedValue, actualPost)
 	})
 }
 
 func TestGet(t *testing.T) {
 	t.Run("Retrieve post from database", func(t *testing.T) {
-		defer db.Exec("DELETE FROM posts; DELETE FROM authors;")
-		authorId = insertAuthor(t)
-		postId := insertPost(t, authorId)
+		var expectedErr error = nil
+		authorId = insertAuthor()
+		postId := insertPost(authorId)
 		expectedPost := structs.Post{
+			ID: postId,
 			Text: post.Text,
 			Title: post.Title,
-			Author: author,
+			AuthorId: authorId,
 		}
-		var expectedErr error = nil
-		actualPost, err := postRepo.Get(postId)
+		aPost, err := postRepo.Get(postId)
+		cleanTimestamp(&aPost)
+
 		tests.AssertEquals(t, expectedErr, err)
-		tests.AssertEquals(t, expectedPost, actualPost)
+		tests.AssertEquals(t, expectedPost, aPost)
 	})
 }
 
 func TestUpdate(t *testing.T) {
-	defer db.Exec("DELETE FROM posts; DELETE FROM authors;")
 	t.Run("Update post on database", func(t *testing.T) {
-		authorId := insertAuthor(t)
-		postId := insertPost(t, authorId)
+		authorId := insertAuthor()
+		postId := insertPost(authorId)
 		expectedPost := structs.Post{
+			ID: postId,
 			Text: "Test post 2",
 			Title: "Updated post",
+			AuthorId: authorId,
 		}
 		var expectedErr error = nil 
 		actualErr := postRepo.Update(postId, expectedPost)
+		actualPost := queryPost(postId)
+		cleanTimestamp(&actualPost)
+
 		tests.AssertEquals(t, expectedErr, actualErr)
-		actualPost, _, err := queryPost(t, postId)
-		if err != nil {
-			t.Errorf("Couldn't retrieve data from database, error %v", err.Error())
-		}
 		tests.AssertEquals(t, expectedPost, actualPost)
 	})
 }
 
 func TestDelete(t *testing.T) {
-	defer db.Exec("DELETE FROM posts; DELETE FROM authors;")
-	authorId := insertAuthor(t)
-	postId := insertPost(t, authorId)
-	var expectedErr error = nil
 	t.Run("Delete post", func(t *testing.T) {
+		authorId := insertAuthor()
+		postId := insertPost(authorId)
+		var expectedErr error = nil
 		actualErr := postRepo.Delete(postId)
+		actualPost := queryPost(postId)
+		cleanTimestamp(&actualPost)
+
 		tests.AssertEquals(t, expectedErr, actualErr)
-		actualPost, _, _ := queryPost(t, postId)
 		tests.AssertEquals(t, structs.Post{}, actualPost)
 	})
 }

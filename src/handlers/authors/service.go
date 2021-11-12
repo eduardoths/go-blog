@@ -32,29 +32,28 @@ func (ah AuthorHandler) Route() {
 
 func (ah AuthorHandler) create(ctx *fiber.Ctx) error {
 	var authorCreate structs.Author
+	var body map[string]interface{} 
 	response := myhttp.New()
-	status := http.StatusOK
+	status := 0
 	
-	if err := ctx.BodyParser(&authorCreate); err != nil {
-		response.Errors = []interface{}{"Invalid request"}
-		status = http.StatusBadRequest
-
-	} else if err := ah.serv.Create(authorCreate); err != nil {
-		if err.Error()[:3] == "pq:" {  // Errors coming from postgres
-			status = http.StatusInternalServerError
-			response.Errors = []interface{}{"Internal server error"}
-		} else {
-			status = http.StatusBadRequest
-			response.Errors = []interface{}{
-				"Bad body parameters",
-				err.Error(),
-			}
-		}
-
-	} else {
-		response.Data = "Author created!"
-		status = http.StatusCreated
+	if err := ctx.BodyParser(&body); err != nil {
+		response.Errors = []interface{}{"Invalid request", err.Error()}
+		return ctx.Status(http.StatusBadRequest).JSON(response)
 	}
+	authorCreate = structs.Author{
+		Name: body["name"].(string),
+		Email: body["email"].(string),
+	}
+	id, err := ah.serv.Create(authorCreate)
+	if err != nil {
+		status = http.StatusBadRequest
+		response.Errors = []interface{}{
+			err.Error(),
+		}
+		return ctx.Status(status).JSON(response)
+	}
+	response.Data = map[string]int{"id": id}
+	status = http.StatusCreated
 	return ctx.Status(status).JSON(response)
 }
 

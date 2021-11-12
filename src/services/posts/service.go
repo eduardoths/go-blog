@@ -3,6 +3,7 @@ package posts
 import (
 	"errors"
 
+	"github.com/eduardothsantos/go-blog/src/domain/input"
 	"github.com/eduardothsantos/go-blog/src/interfaces"
 	"github.com/eduardothsantos/go-blog/src/structs"
 )
@@ -17,12 +18,13 @@ func NewPostService(repo interfaces.PostRepository) PostService {
 	}
 }
 
-func (ps PostService) Create(post structs.Post, authorId int) error {
-	err := ps.Repo.Create(post, authorId)
+func (ps PostService) Create(post structs.Post) (int, error) {
+	post.Title = input.TransformSingleLine(post.Title)
+	id, err := ps.Repo.Create(post)
 	if err != nil {
-		return errors.New("INTERNAL SERVER ERROR")
+		return 0, errors.New("INTERNAL SERVER ERROR")
 	}
-	return err
+	return id, err
 }
 
 func (ps PostService) Get(id int) (structs.Post, error) {
@@ -38,6 +40,7 @@ func (ps PostService) Get(id int) (structs.Post, error) {
 }
 
 func (ps PostService) Update(id int, post structs.Post) error {
+	post.Title = input.TransformSingleLine(post.Title)
 	err := ps.Repo.Update(id, post)
 	if err != nil {
 		return errors.New("INTERNAL SERVER ERROR")

@@ -30,7 +30,7 @@ func TestNewAuthorService(t *testing.T) {
 func TestCreate(t *testing.T) {
 	t.Run("Test author creation service", func(t *testing.T) {
 		var expectedErr error = nil
-		actualErr := authorService.Create(fakeAuthor)
+		_, actualErr := authorService.Create(fakeAuthor)
 		tests.AssertEquals(t, expectedErr, actualErr)  
 	})
 
@@ -40,7 +40,7 @@ func TestCreate(t *testing.T) {
 			Name: "  ",
 			Email: "test@author.com",
 		}
-		actualErr := authorService.Create(expectedAuthor)
+		_, actualErr := authorService.Create(expectedAuthor)
 		tests.AssertEquals(t, expectedErr, actualErr.Error())
 	})
 }

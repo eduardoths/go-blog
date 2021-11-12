@@ -1,21 +1,21 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 
+	"github.com/eduardothsantos/go-blog/migrations"
 	"github.com/eduardothsantos/go-blog/pkg/databases"
 )
 
 func main() {
 	db := databases.Config()
-	defer db.Close()
-	query, err := ioutil.ReadFile("migrations/migration.sql")
+	err := db.AutoMigrate(&migrations.Author{})
 	if err != nil {
-		log.Panicf("Couldn't read file %v, error: %v", "migrations/migration.sql", err.Error())
+		log.Fatalf("Couldn't migrate authors, error: %v", err.Error())
 	}
-	_, err = db.Exec(string(query))
+
+	err = db.AutoMigrate(&migrations.Post{})
 	if err != nil {
-		log.Printf("Couldn't execute query, error: %v", err.Error())
+		log.Fatalf("Couldn't migrate posts, error: %v", err.Error())
 	}
 }

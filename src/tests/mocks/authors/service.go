@@ -10,8 +10,8 @@ type MockAuthorService struct {
 	interfaces.PostRepository
 }
 
-func (mas MockAuthorService) Create(post structs.Post) error {
-	return nil
+func (mas MockAuthorService) Create(post structs.Post) (int, error) {
+	return 0, nil
 } 
 
 func (mas MockAuthorService) Get(id int) (structs.Post, error) {
