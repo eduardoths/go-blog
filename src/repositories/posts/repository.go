@@ -1,6 +1,7 @@
 package posts
 
 import (
+	"errors"
 	"time"
 
 	"github.com/eduardothsantos/go-blog/src/structs"
@@ -39,10 +40,16 @@ func (pr PostRepository) Update(id int, post structs.Post) error {
 		Text:  post.Text,
 	}
 	tx := pr.db.Model(structs.Post{}).Where("id = ?", id).Updates(postToUpdate)
+	if tx.RowsAffected == 0 {
+		return errors.New("record not found")
+	}
 	return tx.Error
 }
 
 func (pr PostRepository) Delete(id int) error {
 	tx := pr.db.Where("id = ?", id).Delete(&structs.Post{})
+	if tx.RowsAffected == 0 {
+		return errors.New("record not found")
+	}
 	return tx.Error
 }
