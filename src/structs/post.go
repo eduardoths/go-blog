@@ -7,11 +7,11 @@ import (
 )
 
 type Post struct {
-	ID        int
-	Title     string
-	Text      string
-	AuthorId  int
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+	ID        int            `json:"id"`
+	Title     string         `json:"title"`
+	Text      string         `json:"text"`
+	AuthorId  int            `json:"author_id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 }

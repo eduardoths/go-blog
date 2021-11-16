@@ -7,10 +7,10 @@ import (
 )
 
 type Author struct {
-	ID        int
-	Name      string
-	Email     string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+	ID        int            `json:"id"`
+	Name      string         `json:"name"`
+	Email     string         `json:"email"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 }
