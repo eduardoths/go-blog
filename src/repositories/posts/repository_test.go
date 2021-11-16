@@ -149,6 +149,15 @@ func TestUpdate(t *testing.T) {
 		tests.AssertEquals(t, expectedErr, actualErr)
 		tests.AssertEquals(t, expectedPost, actualPost)
 	})
+
+	t.Run("Updating unexisting post", func(t *testing.T) {
+		var fakeId = 1237
+		var expectedErr string = "record not found"
+
+		actualErr := postRepo.Update(fakeId, structs.Post{})
+
+		tests.AssertEquals(t, expectedErr, actualErr.Error())
+	})
 }
 
 func TestDelete(t *testing.T) {
@@ -162,5 +171,14 @@ func TestDelete(t *testing.T) {
 
 		tests.AssertEquals(t, expectedErr, actualErr)
 		tests.AssertEquals(t, structs.Post{}, actualPost)
+	})
+
+	t.Run("Deleting unexisting post", func(t *testing.T) {
+		var fakeId = 21378
+		var expectedErr string = "record not found"
+
+		actualErr := postRepo.Delete(fakeId)
+
+		tests.AssertEquals(t, expectedErr, actualErr.Error())
 	})
 }
