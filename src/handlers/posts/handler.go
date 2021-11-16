@@ -141,7 +141,7 @@ func (ph PostHandler) delete(ctx *fiber.Ctx) error {
 	if err := ph.serv.Delete(id); err != nil {
 		if err.Error() == "record not found" {
 			status = http.StatusNotFound
-			response.Errors = []interface{}{"Post not found"}
+			response.Errors = []interface{}{"record not found"}
 		} else {
 			status = http.StatusInternalServerError
 			response.Errors = []interface{}{"Internal Server Error"}
