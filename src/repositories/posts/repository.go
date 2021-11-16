@@ -1,6 +1,8 @@
 package posts
 
 import (
+	"time"
+
 	"github.com/eduardothsantos/go-blog/src/structs"
 	"gorm.io/gorm"
 )
@@ -10,8 +12,9 @@ type PostRepository struct {
 }
 
 type postUpdate struct {
-	Title string
-	Text  string
+	Title     string
+	Text      string
+	UpdatedAt time.Time
 }
 
 func NewPostRepository(db *gorm.DB) PostRepository {
