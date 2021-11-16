@@ -6,7 +6,7 @@ import (
 	"github.com/eduardothsantos/go-blog/src/structs"
 )
 
-func AuthorValidation(author *structs.Author) error {
+func authorValidation(author *structs.Author) error {
 	author.Name = input.TransformSingleLine(author.Name)
 	author.Email = input.TransformSingleLine(author.Email)
 	err := input.ValidateNameField(author.Name)
@@ -31,7 +31,7 @@ func NewAuthorService(repo interfaces.AuthorRepository) AuthorService {
 }
 
 func (as AuthorService) Create(author structs.Author) (int, error) {
-	err := AuthorValidation(&author)
+	err := authorValidation(&author)
 	if err != nil {
 		return 0, err
 	}
@@ -43,7 +43,7 @@ func (as AuthorService) Get(id int) (structs.Author, error) {
 }
 
 func (as AuthorService) Update(id int, author structs.Author) error {
-	err := AuthorValidation(&author)
+	err := authorValidation(&author)
 	if err != nil {
 		return err
 	}

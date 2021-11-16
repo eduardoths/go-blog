@@ -36,11 +36,21 @@ func TestCreate(t *testing.T) {
 
 	t.Run("Test author creation with invalid name", func(t *testing.T) {
 		var expectedErr string = "name.invalid"
-		expectedAuthor := structs.Author{
+		author := structs.Author{
 			Name:  "  ",
 			Email: "test@author.com",
 		}
-		_, actualErr := authorService.Create(expectedAuthor)
+		_, actualErr := authorService.Create(author)
+		tests.AssertEquals(t, expectedErr, actualErr.Error())
+	})
+
+	t.Run("Test author creation with invalid email", func(t *testing.T) {
+		var expectedErr string = "email.invalid"
+		author := structs.Author{
+			Name:  "Test author",
+			Email: "!$.com",
+		}
+		_, actualErr := authorService.Create(author)
 		tests.AssertEquals(t, expectedErr, actualErr.Error())
 	})
 }
@@ -64,11 +74,20 @@ func TestUpdate(t *testing.T) {
 
 	t.Run("Test author update with invalid name", func(t *testing.T) {
 		expectedErr := "name.invalid"
-		expectedAuthor := structs.Author{
+		author := structs.Author{
 			Name:  "     3ed",
 			Email: "test@author.com",
 		}
-		actualErr := authorService.Update(0, expectedAuthor)
+		actualErr := authorService.Update(0, author)
+		tests.AssertEquals(t, expectedErr, actualErr.Error())
+	})
+	t.Run("Test author with invalid email", func(t *testing.T) {
+		expectedErr := "email.invalid"
+		author := structs.Author{
+			Name:  "Test author",
+			Email: "test@",
+		}
+		actualErr := authorService.Update(0, author)
 		tests.AssertEquals(t, expectedErr, actualErr.Error())
 	})
 }
