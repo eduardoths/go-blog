@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/eduardothsantos/go-blog/src/domain/myhttp"
+	"github.com/eduardothsantos/go-blog/src/httputils"
 	"github.com/eduardothsantos/go-blog/src/interfaces"
 	"github.com/eduardothsantos/go-blog/src/structs"
 	"github.com/gofiber/fiber/v2"
@@ -12,7 +12,7 @@ import (
 
 func recoverPanic(ctx *fiber.Ctx) {
 	if r := recover(); r != nil {
-		response := myhttp.New()
+		response := httputils.NewResponse()
 		response.Errors = []interface{}{"INTERNAL SERVER ERROR"}
 		ctx.Status(http.StatusInternalServerError).JSON(response)
 	}
@@ -41,7 +41,7 @@ func (ah AuthorHandler) Route() {
 func (ah AuthorHandler) create(ctx *fiber.Ctx) error {
 	var authorCreate structs.Author
 	var body map[string]interface{}
-	response := myhttp.New()
+	response := httputils.NewResponse()
 	var status int
 
 	if err := ctx.BodyParser(&body); err != nil {
@@ -67,7 +67,7 @@ func (ah AuthorHandler) create(ctx *fiber.Ctx) error {
 }
 
 func (ah AuthorHandler) get(ctx *fiber.Ctx) error {
-	response := myhttp.New()
+	response := httputils.NewResponse()
 	var status int
 	authorId := ctx.Params("id")
 	id, err := strconv.Atoi(authorId)
@@ -92,7 +92,7 @@ func (ah AuthorHandler) get(ctx *fiber.Ctx) error {
 func (ah AuthorHandler) update(ctx *fiber.Ctx) error {
 	var authorUpdate structs.Author
 	var body map[string]interface{}
-	response := myhttp.New()
+	response := httputils.NewResponse()
 	var status int
 
 	authorId := ctx.Params("id")
@@ -134,7 +134,7 @@ func (ah AuthorHandler) update(ctx *fiber.Ctx) error {
 }
 
 func (ah AuthorHandler) delete(ctx *fiber.Ctx) error {
-	response := myhttp.New()
+	response := httputils.NewResponse()
 	var status int
 	authorId := ctx.Params("id")
 	id, err := strconv.Atoi(authorId)

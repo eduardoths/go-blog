@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/eduardothsantos/go-blog/src/domain/myhttp"
+	"github.com/eduardothsantos/go-blog/src/httputils"
 	"github.com/eduardothsantos/go-blog/src/interfaces"
 	"github.com/eduardothsantos/go-blog/src/structs"
 	"github.com/gofiber/fiber/v2"
@@ -12,7 +12,7 @@ import (
 
 func recoverPanic(ctx *fiber.Ctx) {
 	if r := recover(); r != nil {
-		response := myhttp.New()
+		response := httputils.NewResponse()
 		response.Errors = []interface{}{"INTERNAL SERVER ERROR"}
 		ctx.Status(http.StatusInternalServerError).JSON(response)
 	}
@@ -39,7 +39,7 @@ func (ph PostHandler) Route() {
 }
 
 func (ph PostHandler) create(ctx *fiber.Ctx) error {
-	response := myhttp.New()
+	response := httputils.NewResponse()
 	var status int
 	var body map[string]interface{}
 	if err := ctx.BodyParser(&body); err != nil {
@@ -68,7 +68,7 @@ func (ph PostHandler) create(ctx *fiber.Ctx) error {
 }
 
 func (ph PostHandler) get(ctx *fiber.Ctx) error {
-	response := myhttp.New()
+	response := httputils.NewResponse()
 	var status int
 	postId := ctx.Params("id")
 	id, err := strconv.Atoi(postId)
@@ -92,7 +92,7 @@ func (ph PostHandler) get(ctx *fiber.Ctx) error {
 func (ph PostHandler) update(ctx *fiber.Ctx) error {
 	var status int
 	var body map[string]interface{}
-	response := myhttp.New()
+	response := httputils.NewResponse()
 
 	postId := ctx.Params("id")
 	id, err := strconv.Atoi(postId)
@@ -130,7 +130,7 @@ func (ph PostHandler) update(ctx *fiber.Ctx) error {
 }
 
 func (ph PostHandler) delete(ctx *fiber.Ctx) error {
-	response := myhttp.New()
+	response := httputils.NewResponse()
 	var status int
 	postId := ctx.Params("id")
 	id, err := strconv.Atoi(postId)
