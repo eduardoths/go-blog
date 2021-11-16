@@ -16,11 +16,6 @@ import (
 
 var server = integration.InitTestServer()
 
-type Author struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-}
-
 func cleanTimestamps(author *structs.Author) {
 	author.CreatedAt = time.Time{}
 	author.UpdatedAt = time.Time{}
