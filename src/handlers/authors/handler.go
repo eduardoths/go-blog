@@ -10,6 +10,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func recoverPanic(ctx *fiber.Ctx) {
+	if r := recover(); r != nil {
+		response := myhttp.New()
+		response.Errors = []interface{}{"INTERNAL SERVER ERROR"}
+		ctx.Status(http.StatusInternalServerError).JSON(response)
+	}
+}
+
 type AuthorHandler struct {
 	serv  interfaces.AuthorService
 	route fiber.Router
@@ -34,12 +42,13 @@ func (ah AuthorHandler) create(ctx *fiber.Ctx) error {
 	var authorCreate structs.Author
 	var body map[string]interface{}
 	response := myhttp.New()
-	status := 0
+	var status int
 
 	if err := ctx.BodyParser(&body); err != nil {
 		response.Errors = []interface{}{"Invalid request", err.Error()}
 		return ctx.Status(http.StatusBadRequest).JSON(response)
 	}
+	defer recoverPanic(ctx)
 	authorCreate = structs.Author{
 		Name:  body["name"].(string),
 		Email: body["email"].(string),
@@ -59,7 +68,7 @@ func (ah AuthorHandler) create(ctx *fiber.Ctx) error {
 
 func (ah AuthorHandler) get(ctx *fiber.Ctx) error {
 	response := myhttp.New()
-	status := http.StatusOK
+	var status int
 	authorId := ctx.Params("id")
 	id, err := strconv.Atoi(authorId)
 	if err != nil || authorId == "" {
@@ -84,7 +93,7 @@ func (ah AuthorHandler) update(ctx *fiber.Ctx) error {
 	var authorUpdate structs.Author
 	var body map[string]interface{}
 	response := myhttp.New()
-	status := 0
+	var status int
 
 	authorId := ctx.Params("id")
 
@@ -99,7 +108,7 @@ func (ah AuthorHandler) update(ctx *fiber.Ctx) error {
 		response.Errors = []interface{}{"Invalid request", err.Error()}
 		return ctx.Status(http.StatusBadRequest).JSON(response)
 	}
-
+	defer recoverPanic(ctx)
 	authorUpdate = structs.Author{
 		Name:  body["name"].(string),
 		Email: body["email"].(string),
@@ -126,7 +135,7 @@ func (ah AuthorHandler) update(ctx *fiber.Ctx) error {
 
 func (ah AuthorHandler) delete(ctx *fiber.Ctx) error {
 	response := myhttp.New()
-	status := http.StatusOK
+	var status int
 	authorId := ctx.Params("id")
 	id, err := strconv.Atoi(authorId)
 	if err != nil {
